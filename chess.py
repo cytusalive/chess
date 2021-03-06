@@ -22,15 +22,18 @@ class Pieces:
         self.dict = {}
     
     def load_pieces(self):
-        piece_types = ['r', 'n', 'b', 'q', 'k', 'p']
+        piece_types = ['R', 'N', 'B', 'Q', 'K', 'P']
         for ptype in piece_types:
-            self.dict['w'+ptype] = pygame.image.load('w'+ptype+'.png')
-            self.dict['b'+ptype] = pygame.image.load('b'+ptype+'.png')
+            self.dict['w'+ptype] = pygame.image.load('piece_sprites/w'+ptype+'.png')
+            self.dict['b'+ptype] = pygame.image.load('piece_sprites/b'+ptype+'.png')
+
+
 
 class Chessboard:
-    def __init__(self, area):
+    def __init__(self, area, pieces):
         self.area = area
         self.board = ['' for i in range(64)]
+        self.pieces = pieces
         self.screen_x, self.screen_y = pygame.display.get_window_size()
         self.square = pygame.Surface((self.screen_x/8, self.screen_y/8)) 
 
@@ -54,7 +57,7 @@ class Chessboard:
                     board_index += 1
             
               
-    def draw(self):
+    def draw_board(self):
         for y in range(8):
             for x in range(8):
                 if y % 2:
@@ -70,13 +73,28 @@ class Chessboard:
 
                 self.area.blit(self.square, (self.screen_x/8 * x, self.screen_y/8 * y))
 
-chessgame = Chessboard(screen)
+    def draw_pieces(self):
+        for square_index in range(len(self.board)):
+            if self.board[square_index]:
+                x, y = index_to_coordinates(square_index)
+                self.area.blit(self.pieces.dict[self.board[square_index]], (x*self.screen_x/8, y*self.screen_y/8))
+
+def index_to_coordinates(index):
+    y = index // 8 
+    x = index % 8 
+    return (x, y)
+
+
+pieces = Pieces()
+pieces.load_pieces()
+chessgame = Chessboard(screen, pieces)
 chessgame.load_position()
-print(chessgame.board)
+
 
 while True:
     screen.fill(bgcolor)
-    chessgame.draw()
+    chessgame.draw_board()
+    chessgame.draw_pieces()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
