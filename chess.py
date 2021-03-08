@@ -19,13 +19,13 @@ LIGHT_SQUARE = (200, 180, 120)
 
 class Pieces:
     def __init__(self):
-        self.dict = {}
+        self.types = {}
     
     def load_pieces(self):
         piece_types = ['R', 'N', 'B', 'Q', 'K', 'P']
         for ptype in piece_types:
-            self.dict['w'+ptype] = pygame.image.load('piece_sprites/w'+ptype+'.png')
-            self.dict['b'+ptype] = pygame.image.load('piece_sprites/b'+ptype+'.png')
+            self.types['w'+ptype] = pygame.image.load('piece_sprites/w'+ptype+'.png')
+            self.types['b'+ptype] = pygame.image.load('piece_sprites/b'+ptype+'.png')
 
 
 
@@ -77,19 +77,26 @@ class Chessboard:
         for square_index in range(len(self.board)):
             if self.board[square_index]:
                 x, y = index_to_coordinates(square_index)
-                self.area.blit(self.pieces.dict[self.board[square_index]], (x*self.screen_x/8, y*self.screen_y/8))
+                self.area.blit(self.pieces.types[self.board[square_index]], (x*self.screen_x/8, y*self.screen_y/8))
 
 def index_to_coordinates(index):
     y = index // 8 
     x = index % 8 
     return (x, y)
 
+def coordinates_to_index(x, y):
+    index = y * 8 + x
+    return index
+
+
+print(coordinates_to_index(0,6))
 
 pieces = Pieces()
 pieces.load_pieces()
 chessgame = Chessboard(screen, pieces)
 chessgame.load_position()
 
+dragging = False
 
 while True:
     screen.fill(bgcolor)
@@ -100,6 +107,28 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
+        
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if dragging == False:
+                mousex, mousey = pygame.mouse.get_pos()
+                square_index = coordinates_to_index(mousex//80, mousey//80)
+                dragging_piece = chessgame.board[square_index]
+                chessgame.board[square_index] = ''
+                dragging = True
+
+        if event.type == pygame.MOUSEBUTTONUP:
+            if dragging == True:
+                mousex, mousey = pygame.mouse.get_pos()
+                square_index = coordinates_to_index(mousex//80, mousey//80)
+                chessgame.board[square_index] = dragging_piece
+                dragging = False
+
+    mouse = pygame.mouse.get_pressed()
+    if mouse[0]:
+        if dragging == True:
+            mousex, mousey = pygame.mouse.get_pos()
+            screen.blit(pieces.types[dragging_piece], (mousex-40, mousey-40))
+
 
     pygame.display.update()
     msElapsed = clock.tick(30)
