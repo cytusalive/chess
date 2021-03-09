@@ -27,17 +27,16 @@ class Pieces:
             self.types['w'+ptype] = pygame.image.load('piece_sprites/w'+ptype+'.png')
             self.types['b'+ptype] = pygame.image.load('piece_sprites/b'+ptype+'.png')
 
-
-
 class Chessboard:
     def __init__(self, area, pieces):
         self.area = area
         self.board = ['' for i in range(64)]
         self.pieces = pieces
         self.screen_x, self.screen_y = pygame.display.get_window_size()
-        self.square = pygame.Surface((self.screen_x/8, self.screen_y/8)) 
+        self.square = pygame.Surface((self.screen_x/8, self.screen_y/8))
+        self.color_to_move = ''
 
-    def load_position(self, position='rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq'):
+    def load_position(self, position='rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w'):
         board_index = 0
         for fen_index in range(len(position)):
             if position[fen_index].isnumeric():
@@ -47,6 +46,7 @@ class Chessboard:
             elif position[fen_index] == '/':
                 continue
             elif position[fen_index] == ' ':
+                self.color_to_move = position[fen_index+1]
                 break
             else:
                 if position[fen_index].islower():
@@ -72,12 +72,22 @@ class Chessboard:
                         self.square.fill(LIGHT_SQUARE)
 
                 self.area.blit(self.square, (self.screen_x/8 * x, self.screen_y/8 * y))
+        if self.color_to_move == 'w':
+            pygame.display.set_caption("Chess - White to Move")
+        elif self.color_to_move == 'b':
+            pygame.display.set_caption("Chess - Black to Move")
 
     def draw_pieces(self):
         for square_index in range(len(self.board)):
             if self.board[square_index]:
                 x, y = index_to_coordinates(square_index)
                 self.area.blit(self.pieces.types[self.board[square_index]], (x*self.screen_x/8, y*self.screen_y/8))
+
+    def switch_turns(self):
+        if self.color_to_move == 'w':
+            self.color_to_move = 'b'
+        elif self.color_to_move == 'b':
+            self.color_to_move = 'w'
 
 def index_to_coordinates(index):
     y = index // 8 
@@ -111,17 +121,26 @@ while True:
         if event.type == pygame.MOUSEBUTTONDOWN:
             if dragging == False:
                 mousex, mousey = pygame.mouse.get_pos()
-                square_index = coordinates_to_index(mousex//80, mousey//80)
-                dragging_piece = chessgame.board[square_index]
-                chessgame.board[square_index] = ''
-                dragging = True
+                old_square_index = coordinates_to_index(mousex//80, mousey//80)
+                if chessgame.board[old_square_index]:
+                    if chessgame.board[old_square_index][0] == chessgame.color_to_move:
+                        old_position = chessgame.board
+                        dragging_piece = chessgame.board[old_square_index]
+                        chessgame.board[old_square_index] = ''
+                        dragging = True
 
         if event.type == pygame.MOUSEBUTTONUP:
             if dragging == True:
                 mousex, mousey = pygame.mouse.get_pos()
-                square_index = coordinates_to_index(mousex//80, mousey//80)
-                chessgame.board[square_index] = dragging_piece
-                dragging = False
+                new_square_index = coordinates_to_index(mousex//80, mousey//80)
+                if chessgame.board[new_square_index] == '' or chessgame.board[new_square_index][0] != chessgame.color_to_move:
+                    chessgame.board[new_square_index] = dragging_piece
+                    dragging = False
+                    chessgame.switch_turns()
+                elif chessgame.board[new_square_index][0] == chessgame.color_to_move:
+                    chessgame.board[old_square_index] = dragging_piece
+                    dragging = False
+                
 
     mouse = pygame.mouse.get_pressed()
     if mouse[0]:
