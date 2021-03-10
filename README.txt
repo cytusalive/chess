@@ -1,0 +1,3 @@
+todo:
+
+get legal moves
