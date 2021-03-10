@@ -2,7 +2,6 @@ import pygame
 import sys
 import random
 import math
-from spritesheet_functions import SpriteSheet
 
 pygame.init()
 pygame.display.set_caption("Chess")
