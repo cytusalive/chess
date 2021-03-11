@@ -2,6 +2,7 @@ import pygame
 import sys
 import random
 import math
+from rules import Rules
 
 pygame.init()
 pygame.display.set_caption("Chess")
@@ -37,7 +38,7 @@ class Chessboard:
         self.color_to_move = ''
         self.highlight_squares = []
 
-    def load_position(self, position='rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w'):
+    def load_position(self, position='8/8/7r/8/7R/8/8/8 w'): #'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w'
         board_index = 0
         for fen_index in range(len(position)):
             if position[fen_index].isnumeric():
@@ -110,6 +111,8 @@ pieces.load_pieces()
 chessgame = Chessboard(screen, pieces)
 chessgame.load_position()
 
+rules = Rules()
+
 dragging = False
 
 while True:
@@ -128,6 +131,8 @@ while True:
                 old_square_index = coordinates_to_index(mousex//80, mousey//80)
                 if chessgame.board[old_square_index]:
                     if chessgame.board[old_square_index][0] == chessgame.color_to_move:
+                        legal_moves = rules.get_legal_moves(chessgame.board, old_square_index)
+                        print(legal_moves)
                         dragging_piece = chessgame.board[old_square_index]
                         chessgame.board[old_square_index] = ''
                         dragging = True
@@ -154,6 +159,7 @@ while True:
                     chessgame.highlight_squares = [old_square_index, new_square_index]
                     chessgame.board[new_square_index] = dragging_piece
                     dragging = False
+                    
                     chessgame.switch_turns()
                 else:
                     chessgame.board[old_square_index] = dragging_piece
