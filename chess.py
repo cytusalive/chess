@@ -14,9 +14,10 @@ bgcolor = (250, 250, 250)
 
 clock = pygame.time.Clock()
 
-DARK_SQUARE = (100, 40, 20)
+DARK_SQUARE = (120, 60, 40)
 LIGHT_SQUARE = (200, 180, 120)
 HIGHLIGHT_SQUARE = (240, 240, 120, 180)
+MOVE_INDICATOR = (100, 200, 150, 100)
 
 pygame.font.init()
 font = pygame.font.SysFont("Arial", 20, True)
@@ -40,8 +41,9 @@ class Chessboard:
         self.square = pygame.Surface((self.screen_x/8, self.screen_y/8))
         self.color_to_move = ''
         self.highlight_squares = []
+        self.dotted_squares = []
 
-    def load_position(self, position='8/8/8/3bB3/3Bb3/8/8/8 w'): #'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+    def load_position(self, position='rrrrRRRR/8/8/3bB3/3Bb3/8/8/8 w'): #'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
         board_index = 0
         for fen_index in range(len(position)):
             if position[fen_index].isnumeric():
@@ -75,15 +77,23 @@ class Chessboard:
                         self.square.fill(DARK_SQUARE)
                     else:
                         self.square.fill(LIGHT_SQUARE)
+
+                # showing square index, remove after development
                 index = font.render(str(y*8 + x), True, (0, 0, 0))
                 self.square.blit(index, (0, 0))
+
                 self.area.blit(self.square, (self.screen_x/8 * x, self.screen_y/8 * y))
 
                 if 8*y+x in self.highlight_squares:
                     transparent_square = pygame.Surface((80,80)).convert_alpha()
                     transparent_square.fill(HIGHLIGHT_SQUARE)
                     self.area.blit(transparent_square, (self.screen_x/8 * x, self.screen_y/8 * y))
-
+                if 8*y+x in self.dotted_squares:
+                    transparent_square = pygame.Surface((80,80)).convert_alpha()
+                    transparent_square.fill(MOVE_INDICATOR)
+                    self.area.blit(transparent_square, (self.screen_x/8 * x, self.screen_y/8 * y))
+                
+                
         if self.color_to_move == 'w':
             pygame.display.set_caption("Chess - White to Move")
         elif self.color_to_move == 'b':
@@ -136,12 +146,13 @@ while True:
                 if chessgame.board[old_square_index]:
                     if chessgame.board[old_square_index][0] == chessgame.color_to_move:
                         legal_moves = rules.get_legal_moves(chessgame.board, old_square_index)
-                        print(legal_moves)
+                        chessgame.dotted_squares = legal_moves
                         dragging_piece = chessgame.board[old_square_index]
                         chessgame.board[old_square_index] = ''
                         dragging = True
 
         if event.type == pygame.MOUSEBUTTONUP:
+            chessgame.dotted_squares = []
             if dragging == True:
                 mousex, mousey = pygame.mouse.get_pos()
                 new_square_index = coordinates_to_index(mousex//80, mousey//80)
