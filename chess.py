@@ -18,6 +18,9 @@ DARK_SQUARE = (100, 40, 20)
 LIGHT_SQUARE = (200, 180, 120)
 HIGHLIGHT_SQUARE = (240, 240, 120, 180)
 
+pygame.font.init()
+font = pygame.font.SysFont("Arial", 20, True)
+
 class Pieces:
     def __init__(self):
         self.types = {}
@@ -38,7 +41,7 @@ class Chessboard:
         self.color_to_move = ''
         self.highlight_squares = []
 
-    def load_position(self, position='8/8/7r/8/7R/8/8/8 w'): #'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w'
+    def load_position(self, position='8/8/8/3bB3/3Bb3/8/8/8 w'): #'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
         board_index = 0
         for fen_index in range(len(position)):
             if position[fen_index].isnumeric():
@@ -72,7 +75,8 @@ class Chessboard:
                         self.square.fill(DARK_SQUARE)
                     else:
                         self.square.fill(LIGHT_SQUARE)
-
+                index = font.render(str(y*8 + x), True, (0, 0, 0))
+                self.square.blit(index, (0, 0))
                 self.area.blit(self.square, (self.screen_x/8 * x, self.screen_y/8 * y))
 
                 if 8*y+x in self.highlight_squares:
@@ -141,6 +145,7 @@ while True:
             if dragging == True:
                 mousex, mousey = pygame.mouse.get_pos()
                 new_square_index = coordinates_to_index(mousex//80, mousey//80)
+                '''
                 validmove = False
                 # moving on empty square
                 if chessgame.board[new_square_index] == '':
@@ -154,8 +159,8 @@ while True:
                         validmove = False
                     elif chessgame.board[new_square_index][0] != chessgame.color_to_move:
                         validmove = True
-
-                if validmove:
+                '''
+                if new_square_index in legal_moves:
                     chessgame.highlight_squares = [old_square_index, new_square_index]
                     chessgame.board[new_square_index] = dragging_piece
                     dragging = False
