@@ -43,7 +43,7 @@ class Chessboard:
         self.highlight_squares = []
         self.dotted_squares = []
 
-    def load_position(self, position='rrrrRRRR/8/8/3bB3/3Bb3/8/8/8 w'): #'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+    def load_position(self, position='rrrrRRRR/8/8/QKQbBqkq/3Bb3/8/8/8 w'): #'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
         board_index = 0
         for fen_index in range(len(position)):
             if position[fen_index].isnumeric():
@@ -146,6 +146,7 @@ while True:
                 if chessgame.board[old_square_index]:
                     if chessgame.board[old_square_index][0] == chessgame.color_to_move:
                         legal_moves = rules.get_legal_moves(chessgame.board, old_square_index)
+                        print(legal_moves)
                         chessgame.dotted_squares = legal_moves
                         dragging_piece = chessgame.board[old_square_index]
                         chessgame.board[old_square_index] = ''
