@@ -263,5 +263,17 @@ class Rules:
                         continue
                     elif current_position[move_index][0] != piece_color:
                         legal_moves.append(move_index)
+        if piece_type == 'P':
+            if piece_color == 'w':
+                if piece_index - 8 == '':
+                    legal_moves.append(piece_index - 8)
+                    if piece_index >= 6*8 and piece_index < 7*8:
+                        if piece_index - 16 == '':
+                            legal_moves.append(piece_index - 16)
+                elif current_position[piece_index - 7][0] == 'b':
+                    legal_moves.append(piece_index - 7)
+                elif current_position[piece_index - 9][0] == 'b':
+                    legal_moves.append(piece_index - 9)
+
         return legal_moves       
         
