@@ -245,10 +245,23 @@ class Rules:
                     elif current_position[new_index][0] == piece_color:
                         break
         if piece_type == 'K':
-            directions = [-9, -8, -7, -1, 1, 7, 8, 9]
-            for direction in directions:
-                new_index = piece_index + direction
-                if new_index < 64 and new_index >= 0:
-                    legal_moves.append(new_index)
+            possible_moves = []
+            if piece_index % 8 == 7:
+                for direction in [-9, -8, -1, 7, 8]:
+                    possible_moves.append(piece_index + direction)
+            elif piece_index % 8 == 0:
+                for direction in [-8, -7, 1, 8, 9]:
+                    possible_moves.append(piece_index + direction)
+            else:
+                for direction in [-9, -8, -7, -1, 1, 7, 8, 9]:
+                    possible_moves.append(piece_index + direction)
+            for move_index in possible_moves:
+                if move_index < 64 and move_index >= 0:
+                    if current_position[move_index] == '':
+                        legal_moves.append(move_index)
+                    elif current_position[move_index][0] == piece_color:
+                        continue
+                    elif current_position[move_index][0] != piece_color:
+                        legal_moves.append(move_index)
         return legal_moves       
         
