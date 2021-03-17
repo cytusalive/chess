@@ -43,7 +43,7 @@ class Chessboard:
         self.highlight_squares = []
         self.dotted_squares = []
 
-    def load_position(self, position='rrrrRRRR/8/8/QKQbBqkq/3Bb3/8/8/8 w'): #'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+    def load_position(self, position='rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w'): #'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
         board_index = 0
         for fen_index in range(len(position)):
             if position[fen_index].isnumeric():
@@ -176,7 +176,23 @@ while True:
                     chessgame.highlight_squares = [old_square_index, new_square_index]
                     chessgame.board[new_square_index] = dragging_piece
                     dragging = False
-                    
+                    # PAWN PROMOTION
+                    for piece_index in range(8):
+                        if chessgame.board[piece_index] == 'wP':
+                            chessgame.board[piece_index] = 'wQ'
+                        if chessgame.board[63 - piece_index] == 'bP':
+                            chessgame.board[63 - piece_index] = 'bQ'
+                    # PAWN EN PASSANT
+                    if dragging_piece == 'wP' and new_square_index == rules.en_passant:
+                        chessgame.board[new_square_index + 8] = ''
+                    if dragging_piece == 'bP' and new_square_index == rules.en_passant:
+                        chessgame.board[new_square_index - 8] = ''
+                    rules.en_passant = []
+                    if dragging_piece == 'bP' and new_square_index - old_square_index == 16:
+                        rules.en_passant = new_square_index - 8
+                    if dragging_piece == 'wP' and new_square_index - old_square_index == -16:
+                        rules.en_passant = new_square_index + 8
+
                     chessgame.switch_turns()
                 else:
                     chessgame.board[old_square_index] = dragging_piece

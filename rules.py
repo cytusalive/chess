@@ -265,25 +265,34 @@ class Rules:
                         legal_moves.append(move_index)
         if piece_type == 'P':
             if piece_color == 'w':
-                if piece_index - 8 == '':
-                    legal_moves.append(piece_index - 8)
-                    if piece_index >= 6*8 and piece_index < 7*8:
-                        if piece_index - 16 == '':
-                            legal_moves.append(piece_index - 16)
-                elif current_position[piece_index - 7][0] == 'b':
-                    legal_moves.append(piece_index - 7)
-                elif current_position[piece_index - 9][0] == 'b':
-                    legal_moves.append(piece_index - 9)
+                if piece_index - 8 >= 0:
+                    if current_position[piece_index - 8] == '':
+                        legal_moves.append(piece_index - 8)
+                        if piece_index >= 6*8 and piece_index < 7*8:
+                            if current_position[piece_index - 16] == '':
+                                legal_moves.append(piece_index - 16)
+                    if current_position[piece_index - 7]:
+                        if current_position[piece_index - 7][0] == 'b':
+                            legal_moves.append(piece_index - 7)
+                    if current_position[piece_index - 9]:
+                        if current_position[piece_index - 9][0] == 'b':
+                            legal_moves.append(piece_index - 9)
+                    if piece_index - 7 == self.en_passant or piece_index - 9 == self.en_passant:
+                        legal_moves.append(self.en_passant)
             if piece_color == 'b':
-                if piece_index + 8 == '':
-                    legal_moves.append(piece_index + 8)
-                    if piece_index >= 1*8 and piece_index < 2*8:
-                        if piece_index + 16 == '':
-                            legal_moves.append(piece_index + 16)
-                elif current_position[piece_index + 7][0] == 'w':
-                    legal_moves.append(piece_index + 7)
-                elif current_position[piece_index + 9][0] == 'w':
-                    legal_moves.append(piece_index + 9)
-
+                if piece_index + 8 < 64:
+                    if current_position[piece_index + 8] == '':
+                        legal_moves.append(piece_index + 8)
+                        if piece_index >= 1*8 and piece_index < 2*8:
+                            if current_position[piece_index + 16] == '':
+                                legal_moves.append(piece_index + 16)
+                    if current_position[piece_index + 7]:
+                        if current_position[piece_index + 7][0] == 'w':
+                            legal_moves.append(piece_index + 7)
+                    if current_position[piece_index + 9]:
+                        if current_position[piece_index + 9][0] == 'w':
+                            legal_moves.append(piece_index + 9)
+                    if piece_index + 7 == self.en_passant or piece_index + 9 == self.en_passant:
+                        legal_moves.append(self.en_passant)
         return legal_moves       
         
