@@ -2,7 +2,7 @@ import pygame
 import sys
 import random
 import math
-from rules import Rules
+from rules import get_legal_moves
 
 pygame.init()
 pygame.display.set_caption("Chess")
@@ -42,8 +42,10 @@ class Chessboard:
         self.color_to_move = ''
         self.highlight_squares = []
         self.dotted_squares = []
+        self.en_passant = None
+        self.castle_available = ''
 
-    def load_position(self, position='rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w'): #'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+    def load_position(self, position='rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq'): #'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
         board_index = 0
         for fen_index in range(len(position)):
             if position[fen_index].isnumeric():
@@ -54,6 +56,7 @@ class Chessboard:
                 continue
             elif position[fen_index] == ' ':
                 self.color_to_move = position[fen_index+1]
+                self.castle_available = position[fen_index+3:]
                 break
             else:
                 if position[fen_index].islower():
@@ -125,8 +128,6 @@ pieces.load_pieces()
 chessgame = Chessboard(screen, pieces)
 chessgame.load_position()
 
-rules = Rules()
-
 dragging = False
 
 while True:
@@ -145,8 +146,7 @@ while True:
                 old_square_index = coordinates_to_index(mousex//80, mousey//80)
                 if chessgame.board[old_square_index]:
                     if chessgame.board[old_square_index][0] == chessgame.color_to_move:
-                        legal_moves = rules.get_legal_moves(chessgame.board, old_square_index)
-                        print(legal_moves)
+                        legal_moves = get_legal_moves(chessgame.board, old_square_index, chessgame.castle_available, chessgame.en_passant)
                         chessgame.dotted_squares = legal_moves
                         dragging_piece = chessgame.board[old_square_index]
                         chessgame.board[old_square_index] = ''
@@ -183,17 +183,48 @@ while True:
                         if chessgame.board[63 - piece_index] == 'bP':
                             chessgame.board[63 - piece_index] = 'bQ'
                     # PAWN EN PASSANT
-                    if dragging_piece == 'wP' and new_square_index == rules.en_passant:
+                    if dragging_piece == 'wP' and new_square_index == chessgame.en_passant:
                         chessgame.board[new_square_index + 8] = ''
-                    if dragging_piece == 'bP' and new_square_index == rules.en_passant:
+                    if dragging_piece == 'bP' and new_square_index == chessgame.en_passant:
                         chessgame.board[new_square_index - 8] = ''
-                    rules.en_passant = []
+                    chessgame.en_passant = None
                     if dragging_piece == 'bP' and new_square_index - old_square_index == 16:
-                        rules.en_passant = new_square_index - 8
+                        chessgame.en_passant = new_square_index - 8
                     if dragging_piece == 'wP' and new_square_index - old_square_index == -16:
-                        rules.en_passant = new_square_index + 8
-
+                        chessgame.en_passant = new_square_index + 8
+                    # KING CASTLE
+                    if dragging_piece[1] == 'K' and new_square_index - old_square_index == 2:
+                        chessgame.board[new_square_index-1] = dragging_piece[0] + 'R'
+                        chessgame.board[new_square_index+1] = ''
+                    if dragging_piece[1] == 'K' and new_square_index - old_square_index == -2:
+                        chessgame.board[new_square_index+1] = dragging_piece[0] + 'R'
+                        chessgame.board[new_square_index-2] = ''
+                    if dragging_piece == 'wK':
+                        chessgame.castle_available = chessgame.castle_available.replace('K', '')
+                        chessgame.castle_available = chessgame.castle_available.replace('Q', '')
+                    if dragging_piece == 'bK':
+                        chessgame.castle_available = chessgame.castle_available.replace('k', '')
+                        chessgame.castle_available = chessgame.castle_available.replace('q', '')
+                    if dragging_piece[1] == 'R':
+                        if old_square_index == 0:
+                            chessgame.castle_available = chessgame.castle_available.replace('q', '')
+                        if old_square_index == 7:
+                            chessgame.castle_available = chessgame.castle_available.replace('k', '')
+                        if old_square_index == 56:
+                            chessgame.castle_available = chessgame.castle_available.replace('Q', '')
+                        if old_square_index == 63:
+                            chessgame.castle_available = chessgame.castle_available.replace('K', '')
+                    else:
+                        if new_square_index == 0:
+                            chessgame.castle_available = chessgame.castle_available.replace('q', '')
+                        if new_square_index == 7:
+                            chessgame.castle_available = chessgame.castle_available.replace('k', '')
+                        if new_square_index == 56:
+                            chessgame.castle_available = chessgame.castle_available.replace('Q', '')
+                        if new_square_index == 63:
+                            chessgame.castle_available = chessgame.castle_available.replace('K', '')
                     chessgame.switch_turns()
+
                 else:
                     chessgame.board[old_square_index] = dragging_piece
                     dragging = False
