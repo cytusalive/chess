@@ -1,3 +1,5 @@
+
+
 class Rules:
     def __init__(self, castle='', en_passant=''):
         self.castle = castle
@@ -294,5 +296,16 @@ class Rules:
                             legal_moves.append(piece_index + 9)
                     if piece_index + 7 == self.en_passant or piece_index + 9 == self.en_passant:
                         legal_moves.append(self.en_passant)
+        if piece_type == 'N':
+            moves = [-17, -15, -10, -6, 6, 10, 15, 17]
+            for move in moves:
+                new_index = piece_index + move
+                if new_index >= 0 and new_index < 64 and abs(new_index % 8 - piece_index % 8) < 3:
+                    if current_position[new_index] == '':
+                        legal_moves.append(new_index)
+                    elif current_position[new_index][0] != piece_color:
+                        legal_moves.append(new_index)
+                    elif current_position[new_index][0] == piece_color:
+                        continue 
         return legal_moves       
         
