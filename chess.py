@@ -2,7 +2,7 @@ import pygame
 import sys
 import random
 import math
-from rules import get_legal_moves
+from rules import get_legal_moves, in_check
 
 pygame.init()
 pygame.display.set_caption("Chess")
@@ -17,6 +17,7 @@ clock = pygame.time.Clock()
 DARK_SQUARE = (120, 60, 40)
 LIGHT_SQUARE = (200, 180, 120)
 HIGHLIGHT_SQUARE = (240, 240, 120, 180)
+CHECK_HIGHLIGHT = (250, 100, 100, 100)
 MOVE_INDICATOR = (100, 200, 150, 100)
 
 pygame.font.init()
@@ -44,6 +45,7 @@ class Chessboard:
         self.dotted_squares = []
         self.en_passant = None
         self.castle_available = ''
+        self.incheck_squares = []
 
     def load_position(self, position='rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq'): #'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
         board_index = 0
@@ -95,7 +97,10 @@ class Chessboard:
                     transparent_square = pygame.Surface((80,80)).convert_alpha()
                     transparent_square.fill(MOVE_INDICATOR)
                     self.area.blit(transparent_square, (self.screen_x/8 * x, self.screen_y/8 * y))
-                
+                if 8*y+x in self.incheck_squares:
+                    transparent_square = pygame.Surface((80,80)).convert_alpha()
+                    transparent_square.fill(CHECK_HIGHLIGHT)
+                    self.area.blit(transparent_square, (self.screen_x/8 * x, self.screen_y/8 * y))
                 
         if self.color_to_move == 'w':
             pygame.display.set_caption("Chess - White to Move")
@@ -223,7 +228,15 @@ while True:
                             chessgame.castle_available = chessgame.castle_available.replace('Q', '')
                         if new_square_index == 63:
                             chessgame.castle_available = chessgame.castle_available.replace('K', '')
+                            
                     chessgame.switch_turns()
+
+                    chessgame.incheck_squares = []
+                    if in_check(chessgame.board, chessgame.color_to_move, chessgame.castle_available, chessgame.en_passant):
+                        for square_index in range(len(chessgame.board)):
+                            if chessgame.board[square_index] == chessgame.color_to_move + 'K':
+                                chessgame.incheck_squares.append(square_index)
+
 
                 else:
                     chessgame.board[old_square_index] = dragging_piece
@@ -235,6 +248,6 @@ while True:
             mousex, mousey = pygame.mouse.get_pos()
             screen.blit(pieces.types[dragging_piece], (mousex-40, mousey-40))
 
-
+    
     pygame.display.update()
     msElapsed = clock.tick(30)

@@ -1,6 +1,5 @@
 
 def get_legal_moves(board_state, piece_index, castle='', en_passant=None):
-    print(castle)
     legal_moves = []
     current_position = board_state.copy()
     piece_color = current_position[piece_index][0]
@@ -324,4 +323,13 @@ def get_legal_moves(board_state, piece_index, castle='', en_passant=None):
                 elif current_position[new_index][0] == piece_color:
                     continue 
     return legal_moves       
-    
+
+def in_check(position, turn_to_move, castle='', en_passant=None):
+    for square_index in range(len(position)):
+        if position[square_index]:
+            if position[square_index][0] != turn_to_move:
+                moves = get_legal_moves(position, square_index, castle, en_passant)
+                for move in moves:
+                    if position[move] == turn_to_move + 'K':
+                        return True
+    return False
