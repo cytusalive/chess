@@ -152,6 +152,14 @@ while True:
                 if chessgame.board[old_square_index]:
                     if chessgame.board[old_square_index][0] == chessgame.color_to_move:
                         legal_moves = get_legal_moves(chessgame.board, old_square_index, chessgame.castle_available, chessgame.en_passant)
+                        true_legal_moves = []
+                        for move in legal_moves:
+                            test_position = chessgame.board.copy()
+                            test_position[move] = test_position[old_square_index]
+                            test_position[old_square_index] = ''
+                            if not in_check(test_position, chessgame.color_to_move, '', chessgame.en_passant):
+                                true_legal_moves.append(move)
+                        legal_moves = true_legal_moves
                         chessgame.dotted_squares = legal_moves
                         dragging_piece = chessgame.board[old_square_index]
                         chessgame.board[old_square_index] = ''
@@ -162,22 +170,10 @@ while True:
             if dragging == True:
                 mousex, mousey = pygame.mouse.get_pos()
                 new_square_index = coordinates_to_index(mousex//80, mousey//80)
-                '''
-                validmove = False
-                # moving on empty square
-                if chessgame.board[new_square_index] == '':
-                    if new_square_index == old_square_index:
-                        validmove = False
-                    else:
-                        validmove = True
-                # moving on another piece
-                if chessgame.board[new_square_index]:
-                    if chessgame.board[new_square_index][0] == chessgame.color_to_move:
-                        validmove = False
-                    elif chessgame.board[new_square_index][0] != chessgame.color_to_move:
-                        validmove = True
-                '''
+
                 if new_square_index in legal_moves:
+    
+                    
                     chessgame.highlight_squares = [old_square_index, new_square_index]
                     chessgame.board[new_square_index] = dragging_piece
                     dragging = False

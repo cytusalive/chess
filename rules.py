@@ -322,7 +322,8 @@ def get_legal_moves(board_state, piece_index, castle='', en_passant=None):
                     legal_moves.append(new_index)
                 elif current_position[new_index][0] == piece_color:
                     continue 
-    return legal_moves       
+    return legal_moves
+
 
 def in_check(position, turn_to_move, castle='', en_passant=None):
     for square_index in range(len(position)):
